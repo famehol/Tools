@@ -3,7 +3,8 @@ module AgoraDynamicKey
   class RTCTokenBuilder
     class InvalidParamsError < StandardError
       attr_reader :params, :missing_keys
-      def initialize args={}
+
+      def initialize args = {}
         super
         @params = args[:params]
         @missing_keys = args[:missing_keys]
@@ -125,7 +126,6 @@ module AgoraDynamicKey
       # current timestamp plus 600 seconds, the token expires in 10 minutes. If you do not want to enable this privilege,
       # set pub_data_stream_privilege_expired_ts as the current Unix timestamp.
       # @return The new Token
-
       def build_token_with_uid_and_privilege payload
         check! payload, %i[app_id app_certificate channel_name uid join_channel_privilege_expired_ts pub_audio_privilege_expired_ts pub_video_privilege_expired_ts pub_data_stream_privilege_expired_ts]
         build_token_with_user_account_and_privilege @params.merge(:account => @params[:uid])
@@ -180,7 +180,6 @@ module AgoraDynamicKey
       # current timestamp plus 600 seconds, the token expires in 10 minutes. If you do not want to enable this privilege,
       # set pub_data_stream_privilege_expired_ts as the current Unix timestamp.
       # @return The new Token
-
       def build_token_with_user_account_and_privilege payload
         check! payload, %i[app_id app_certificate channel_name account join_channel_privilege_expired_ts pub_audio_privilege_expired_ts pub_video_privilege_expired_ts pub_data_stream_privilege_expired_ts]
         @params.merge!(:uid => @params[:account])
@@ -195,14 +194,15 @@ module AgoraDynamicKey
         AgoraDynamicKey::AccessToken.generate!(@params) do |t|
           t.grant AgoraDynamicKey::Privilege::JOIN_CHANNEL, t.privilege_expired_ts
           if @params[:role] == Role::PUBLISHER ||
-            @params[:role] == Role::SUBSCRIBER ||
-            @params[:role] == Role::ADMIN
+              @params[:role] == Role::SUBSCRIBER ||
+              @params[:role] == Role::ADMIN
             t.grant AgoraDynamicKey::Privilege::PUBLISH_AUDIO_STREAM, t.privilege_expired_ts
             t.grant AgoraDynamicKey::Privilege::PUBLISH_VIDEO_STREAM, t.privilege_expired_ts
             t.grant AgoraDynamicKey::Privilege::PUBLISH_DATA_STREAM, t.privilege_expired_ts
           end
         end
       end
+
       # generate access token
       def generate_access_token_user_defined!
         # Assign appropriate access privileges to each role.
@@ -220,10 +220,10 @@ module AgoraDynamicKey
         symbolize_keys payload.select { |key| args.include? key }
         missing_keys = args - @params.keys
         raise InvalidParamsError.new(params: payload, missing_keys: missing_keys), "missing params" if missing_keys.size != 0
-        _invalid_params = @params.select { |hash, (k, v)| v.nil? or v.empty?}
+        _invalid_params = @params.select { |hash, (k, v)| v.nil? or v.empty? }
         raise InvalidParamsError.new(params: payload), "invalid params" if _invalid_params.empty?
       end
-      
+
       # symbolize keys
       def symbolize_keys payload
         @params = payload.inject({}) { |hash, (k, v)| hash[k.to_sym] = v; hash }
